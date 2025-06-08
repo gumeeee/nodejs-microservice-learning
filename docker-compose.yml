@@ -16,5 +16,23 @@ services:
       - "4317:4317" # OTLP/gRPC
       - "4318:4318" # OTLP/HTTP
 
+  api-gateway:
+    image: kong:3.9
+    environment:
+      KONG_DATABASE: off
+      KONG_ADMIN_LISTEN: "0.0.0.0:8001"
+      KONG_ADMIN_GUI_URL: http://localhost:8002
+      KONG_DECLARATIVE_CONFIG: "/kong/config.yaml"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - "./docker/kong/config.yaml:/kong/config.yaml"
+    ports:
+      - "8000:8000" # Proxy (API) que recebe as requisições e redireciona para o serviço correto
+      - "8001:8001" # Admin API
+      - "8002:8002" # Admin UI API
+      - "8443:8443" # Proxy com SSL (HTTPs)
+      - "8444:8444" # API do ADMIN com SSL (HTTPs)
+
 volumes:
   rabbitmq_data:
